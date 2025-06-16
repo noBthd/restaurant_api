@@ -6,7 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
-	"github.com/noBthd/restaurant_api/internal/config"
+	"github.com/noBthd/restaurant_api.git/internal/config"
 )
 
 var (
