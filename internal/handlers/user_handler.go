@@ -45,3 +45,31 @@ func CreateUserHandler(c *gin.Context) {
 		"user": user,
 	})
 }
+
+func LoginUserHandler(c *gin.Context) {
+	email := c.Query("email")
+	password := c.Query("password")
+
+	var user = models.User{
+		Email: email,
+		Password: password,
+	}
+
+	existingUser, err := services.LoginUser(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to login user",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if existingUser == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Invalid email or password",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, existingUser)
+}

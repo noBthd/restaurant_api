@@ -22,9 +22,7 @@ func main() {
 	router.GET("/user", handlers.GetUserByEmailHandler)
 
 	// auth/login
-	router.POST("/auth/login", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "Login endpoint not implemented yet"})
-	})
+	router.POST("/auth/login", handlers.LoginUserHandler)
 
 	// auth/register
 	router.POST("/auth/register", handlers.CreateUserHandler)

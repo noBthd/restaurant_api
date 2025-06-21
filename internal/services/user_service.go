@@ -45,3 +45,29 @@ func CreateUser(user *models.User) error {
 
 	return nil
 }
+
+func LoginUser(user *models.User) (*models.User, error) {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return nil, sql.ErrConnDone
+	}
+
+	query := "SELECT id, email, password, creation_date, is_admin FROM users WHERE email = $1 AND password = $2"
+	row := db.DB.QueryRow(query, user.Email, user.Password)
+
+	var existingUser models.User
+	err := row.Scan(&existingUser.ID, &existingUser.Email, &existingUser.Password, &existingUser.Creation_date, &existingUser.Is_admin)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No user found with email: %s", user.Email)
+			return nil, nil
+		}
+
+		log.Printf("Failed to login user: %v", err)
+		return nil, err
+	}
+
+	log.Printf("User logged in successfully: %s", existingUser.Email)
+	return &existingUser, nil
+}
