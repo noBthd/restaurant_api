@@ -19,16 +19,19 @@ func main() {
         c.JSON(200, gin.H{"message": "pong"})
     })
 
+	//=========================================
 	// USER ROUTES
 	router.GET("/user", handlers.GetUserByEmailHandler)
 	// auth/login
 	router.POST("/auth/login", handlers.LoginUserHandler)
 	// auth/register
 	router.POST("/auth/register", handlers.CreateUserHandler)
-
+	
+	//=========================================
 	// RESERVATION ROUTES
 	router.GET("/reservations", handlers.GetAllReservationsHandler)
 	// Create a reservation
+	router.POST("/reservations/create", handlers.CreateReservationHandler)
 		
 
 	router.Run(":8080")	

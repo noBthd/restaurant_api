@@ -10,6 +10,7 @@ import (
 
 func GetAllReservations() ([]models.Reservation, error) {
 	if db.DB == nil {
+		log.Print("Database connection is not initialized")
 		return nil, sql.ErrConnDone
 	}
 
@@ -44,4 +45,20 @@ func GetAllReservations() ([]models.Reservation, error) {
 	}
 
 	return reservations, nil
+}
+
+func CreateReservation(reservation models.Reservation) error {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "INSERT INTO reservations (table_id, user_id, start_time, end_time) VALUES ($1, $2, $3, $4)"
+	_, err := db.DB.Exec(query, reservation.TableID, reservation.UserID, reservation.StartTime, reservation.EndTime)
+	if err != nil {
+		log.Printf("Failed to create user: %v", err)
+		return err
+	}
+
+	return nil
 }
