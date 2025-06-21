@@ -29,3 +29,19 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func CreateUser(user *models.User) error {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "INSERT INTO users (email, password) VALUES ($1, $2)"
+	_, err := db.DB.Exec(query, user.Email, user.Password)
+	if err != nil {
+		log.Printf("Failed to create user: %v", err)
+		return err
+	}
+
+	return nil
+}
