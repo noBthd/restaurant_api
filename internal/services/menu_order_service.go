@@ -8,6 +8,38 @@ import (
 	"github.com/noBthd/restaurant_api.git/internal/models"
 )
 
+func GetAllMenuOrders() ([]models.MenuOrder, error) {
+	if db.DB == nil {
+		log.Println("Database connection is nil")
+		return nil, sql.ErrConnDone
+	}
+
+	query := "SELECT * FROM menu_orders"
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		log.Printf("Error querying menu orders: %v\n", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var menuOrders []models.MenuOrder
+	for rows.Next() {
+		var menuOrder models.MenuOrder
+		if err := rows.Scan(&menuOrder.ID, &menuOrder.OrderID, &menuOrder.MenuItemID, &menuOrder.Quantity, &menuOrder.Price); err != nil {
+			log.Printf("Error scanning menu order: %v\n", err)
+			return nil, err
+		}
+
+		menuOrders = append(menuOrders, menuOrder)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Error iterating over menu orders: %v\n", err)
+		return nil, err
+	}
+
+	return menuOrders, nil
+}
+
 func CreateMenuOrder(MenuOrder *models.MenuOrder, reservationID int) error {
 	if db.DB == nil {
 		log.Println("Database connection is nil")

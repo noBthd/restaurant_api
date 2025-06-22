@@ -44,6 +44,8 @@ func main() {
 
 	//==========================================
 	// ORDER ROUTES
+	router.GET("/orders", handlers.GetAllMenuOrdersHandler)
+	// Make an order
 	router.POST("/orders/create", handlers.CreateMenuOrderHandler)
 
 	//==========================================

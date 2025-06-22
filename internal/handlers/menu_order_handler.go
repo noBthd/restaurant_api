@@ -9,6 +9,23 @@ import (
 	"github.com/noBthd/restaurant_api.git/internal/services"
 )
 
+func GetAllMenuOrdersHandler(c *gin.Context) {
+	menuOrders, err := services.GetAllMenuOrders()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch menu orders",
+			"details": err.Error(),
+		})
+		return
+	}
+	
+	if len(menuOrders) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No menu orders found"})
+		return
+	}
+	c.JSON(http.StatusOK, menuOrders)
+}
+
 func CreateMenuOrderHandler(c *gin.Context) {
 	// Parse the request body to get the MenuOrder details
 	var menuOrder models.MenuOrder
