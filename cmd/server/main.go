@@ -67,6 +67,10 @@ func main() {
 	router.POST("/admin/shift/create", handlers.CreateShiftHandler)
 	// Adding served table
 	router.PATCH("/admin/shift/add_served_table/:shift_id", handlers.AddServedTableHandler)
+	// Remove user
+	router.DELETE("/admin/user/remove/:id", handlers.RemoveUserHandler)
+	// Make user admin
+	router.PATCH("/admin/user/make_admin/:id", handlers.MakeUserAdminHandler)
 
 	router.Run(":8080")	
 }

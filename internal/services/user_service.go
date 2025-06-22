@@ -71,3 +71,37 @@ func LoginUser(user *models.User) (*models.User, error) {
 	log.Printf("User logged in successfully: %s", existingUser.Email)
 	return &existingUser, nil
 }
+
+func RemoveUser(id int) error {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "DELETE FROM users WHERE id = $1"
+	_, err := db.DB.Exec(query, id)
+	if err != nil {
+		log.Printf("Failed to remove user with ID %d: %v", id, err)
+		return err
+	}
+
+	log.Printf("User with ID %d removed successfully", id)
+	return nil
+}
+
+func MakeUserAdmin(id int) error {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "UPDATE users SET is_admin = TRUE WHERE id = $1"
+	_, err := db.DB.Exec(query, id)
+	if err != nil {
+		log.Printf("Failed to make user with ID %d an admin: %v", id, err)
+		return err
+	}
+
+	log.Printf("User with ID %d is now an admin", id)
+	return nil
+}

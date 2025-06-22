@@ -6,6 +6,7 @@ import (
 	"github.com/noBthd/restaurant_api.git/internal/services"
 
 	"net/http"
+	"strconv"
 )
 
 func GetUserByEmailHandler(c *gin.Context) {
@@ -72,4 +73,54 @@ func LoginUserHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, existingUser)
+}
+
+func RemoveUserHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid user ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	err = services.RemoveUser(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to remove user",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User removed successfully",
+		"user_id": id,
+	})
+}
+
+func MakeUserAdminHandler(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid user ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	err = services.MakeUserAdmin(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to make user admin",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User made admin successfully",
+		"user_id": id,
+	})
 }
