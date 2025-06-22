@@ -42,6 +42,9 @@ func main() {
 	//=========================================
 	// BILL ROUTES
 	router.GET("/bills", handlers.GetAllBillsHandler)
+	// Get bill by ReservationID
+	router.GET("/bills/:reservation_id", handlers.GetBillByReservationIDHandler)
+	
 
 	//==========================================
 	// ORDER ROUTES

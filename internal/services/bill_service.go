@@ -40,3 +40,25 @@ func GetAllBills() ([]models.Bill, error) {
 
 	return bills, nil
 }
+
+func GetBillByReservationID(reservationID int) (*models.Bill, error)  {
+	if db.DB == nil {
+		log.Println("Database conn is not initialized")
+		return nil, sql.ErrConnDone
+	}
+
+	query := "SELECT * FROM bill WHERE reservation_id = $1"
+	row := db.DB.QueryRow(query, reservationID)
+
+	var bill models.Bill
+	if err := row.Scan(&bill.ID, &bill.ReservationID, &bill.TotalPrice, &bill.IsPaid); err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No bill found for reservation ID %d\n", reservationID)
+			return nil, nil
+		}
+		log.Printf("Error scanning bill: %v\n", err)
+		return nil, err
+	}
+
+	return &bill, nil
+}

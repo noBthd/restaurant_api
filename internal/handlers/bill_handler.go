@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/noBthd/restaurant_api.git/internal/services"
@@ -18,4 +19,26 @@ func GetAllBillsHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, bills)
+}
+
+func GetBillByReservationIDHandler(c *gin.Context) {
+	reservationID, err := strconv.Atoi(c.Param("reservation_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid reservation ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	bill, err := services.GetBillByReservationID(reservationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve bill",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, bill)
 }
