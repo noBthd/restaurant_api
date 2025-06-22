@@ -45,6 +45,8 @@ func main() {
 	//==========================================
 	// ORDER ROUTES
 	router.GET("/orders", handlers.GetAllMenuOrdersHandler)
+	// Get order by OrderID
+	router.GET("/orders/:id", handlers.GetMenuOrderByIDHandler)
 	// Make an order
 	router.POST("/orders/create", handlers.CreateMenuOrderHandler)
 

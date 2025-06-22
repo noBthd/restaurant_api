@@ -26,6 +26,32 @@ func GetAllMenuOrdersHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, menuOrders)
 }
 
+func GetMenuOrderByIDHandler(c *gin.Context) {
+	orderID, err := strconv.Atoi(c.Param("id"))
+	if err != nil || orderID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid order ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	menuOrder, err := services.GetMenuOrderByID(orderID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch menu order",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if len(menuOrder) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Menu order not found"})
+		return
+	}
+	c.JSON(http.StatusOK, menuOrder)
+}
+
 func CreateMenuOrderHandler(c *gin.Context) {
 	// Parse the request body to get the MenuOrder details
 	var menuOrder models.MenuOrder

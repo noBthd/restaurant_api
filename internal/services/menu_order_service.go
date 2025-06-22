@@ -40,6 +40,42 @@ func GetAllMenuOrders() ([]models.MenuOrder, error) {
 	return menuOrders, nil
 }
 
+func GetMenuOrderByID(orderID int) ([]models.MenuOrder, error) {
+	if db.DB == nil {
+		log.Println("Database connection is nil")
+		return nil, sql.ErrConnDone	
+	}
+
+	query := "SELECT * FROM menu_orders WHERE order_id = $1"
+	rows, err:= db.DB.Query(query, orderID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No menu order found with ID %d\n", orderID)
+			return nil, err
+		}
+		log.Printf("Error querying menu order by ID %d: %v\n", orderID, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var menuOrders []models.MenuOrder
+	for rows.Next() {
+		var menuOrder models.MenuOrder
+		if err := rows.Scan(&menuOrder.ID, &menuOrder.OrderID, &menuOrder.MenuItemID, &menuOrder.Quantity, &menuOrder.Price); err != nil {
+			log.Printf("Error scanning menu order: %v\n", err)
+			return nil, err
+		}
+
+		menuOrders = append(menuOrders, menuOrder)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Error iterating over menu orders: %v\n", err)
+		return nil, err
+	}
+
+	return menuOrders, nil
+}
+
 func CreateMenuOrder(MenuOrder *models.MenuOrder, reservationID int) error {
 	if db.DB == nil {
 		log.Println("Database connection is nil")
