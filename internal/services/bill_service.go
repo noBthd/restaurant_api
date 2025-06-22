@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/noBthd/restaurant_api.git/internal/db"
@@ -69,7 +70,24 @@ func PayBill(billID int) error {
 		return sql.ErrConnDone
 	}
 
-	query := "UPDATE bill SET is_paid = true WHERE reservation_id = $1"
+	query := "SELECT is_paid FROM bill WHERE reservation_id = $1"
+	row := db.DB.QueryRow(query, billID)
+	var isPaid bool
+	if err := row.Scan(&isPaid); err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No bill found for reservation ID %d\n", billID)
+			return fmt.Errorf("no bill found for reservation ID %d", billID)
+		}
+		log.Printf("Error scanning bill payment status: %v\n", err)
+		return err
+	}
+
+	if isPaid {
+		log.Printf("Bill for reservation ID %d is already paid\n", billID)
+		return fmt.Errorf("bill for reservation ID %d is already paid", billID)
+	}
+
+	query = "UPDATE bill SET is_paid = true WHERE reservation_id = $1"
 	_, err := db.DB.Exec(query, billID)
 	if err != nil {
 		log.Printf("Error updating bill payment status: %v\n", err)

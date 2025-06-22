@@ -79,7 +79,7 @@ func CancelReservation(reservationID int) error {
 
 	var isActive bool
 	err := row.Scan(&isActive)
-	// Handle the case where the reservation does not exist
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No reservation found with ID %d", reservationID)
@@ -89,7 +89,6 @@ func CancelReservation(reservationID int) error {
 		return err
 	}
 	
-	// Check if the reservation is already inactive
 	if !isActive {
 		log.Printf("Reservation with ID %d is already inactive", reservationID)
 		return fmt.Errorf("reservation with ID %d is already inactive", reservationID)
