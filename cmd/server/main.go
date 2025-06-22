@@ -41,6 +41,7 @@ func main() {
 
 	//=========================================
 	// BILL ROUTES
+	router.GET("/bills", handlers.GetAllBillsHandler)
 
 	//==========================================
 	// ORDER ROUTES
