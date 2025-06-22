@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/noBthd/restaurant_api.git/internal/models"
@@ -49,4 +50,32 @@ func CreateReservationHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Reservation created successfully"})
+}
+
+func CancelReservationHandler(c *gin.Context) {
+	reservationID := c.Param("id")
+	if reservationID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Reservation ID is required"})
+		return
+	}
+
+	ID, err := strconv.Atoi(reservationID)
+	if err != nil {
+		log.Printf("Error converting reservation ID to integer: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid reservation ID format"})
+		return
+	}
+
+	err = services.CancelReservation(ID)
+	if err != nil {
+		log.Printf("Error canceling reservation: %v", err)
+		c.JSON(http.StatusInternalServerError, 
+			gin.H{
+				"error": "Failed to cancel 1reservation",
+				"details": err.Error(),
+			})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Reservation canceled successfully"})
 }

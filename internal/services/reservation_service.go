@@ -62,3 +62,19 @@ func CreateReservation(reservation models.Reservation) error {
 
 	return nil
 }
+
+func CancelReservation(reservationID int) error {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "UPDATE reservations SET is_active = false WHERE id = $1"
+	_, err := db.DB.Exec(query, reservationID)
+	if err != nil {
+		log.Printf("Failed to cancel reservation: %v", err)
+		return err
+	}
+
+	return nil
+}
