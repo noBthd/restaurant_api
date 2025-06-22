@@ -62,3 +62,19 @@ func GetBillByReservationID(reservationID int) (*models.Bill, error)  {
 
 	return &bill, nil
 }
+
+func PayBill(billID int) error {
+	if db.DB == nil {
+		log.Println("Database conn is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "UPDATE bill SET is_paid = true WHERE reservation_id = $1"
+	_, err := db.DB.Exec(query, billID)
+	if err != nil {
+		log.Printf("Error updating bill payment status: %v\n", err)
+		return err
+	}
+
+	return nil
+}

@@ -42,3 +42,25 @@ func GetBillByReservationIDHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, bill)
 }
+
+func PayBillHandler(c *gin.Context) {
+	reservationID, err := strconv.Atoi(c.Param("reservation_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid reservation ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	err = services.PayBill(reservationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to pay bill",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Bill paid successfully"})
+}

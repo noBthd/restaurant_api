@@ -44,7 +44,8 @@ func main() {
 	router.GET("/bills", handlers.GetAllBillsHandler)
 	// Get bill by ReservationID
 	router.GET("/bills/:reservation_id", handlers.GetBillByReservationIDHandler)
-	
+	// Pay a bill
+	router.PATCH("/bills/pay/:reservation_id", handlers.PayBillHandler)
 
 	//==========================================
 	// ORDER ROUTES
