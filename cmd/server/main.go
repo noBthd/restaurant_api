@@ -62,8 +62,9 @@ func main() {
 	// ADMIN ROUTES
 
 	// Adding waiter
-	router.POST("/admin/waiter/add", handlers.CreateWaiterHandler)
-	
+	router.POST("/admin/waiter/create", handlers.CreateWaiterHandler)
+	// Adding shift
+	router.POST("/admin/shift/create", handlers.CreateShiftHandler)
 
 	router.Run(":8080")	
 }

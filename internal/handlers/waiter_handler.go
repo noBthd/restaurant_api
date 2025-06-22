@@ -13,7 +13,10 @@ func CreateWaiterHandler(c *gin.Context) {
 	var waiter models.Waiter
 	if err := c.ShouldBindJSON(&waiter); err != nil {
 		log.Printf("Error binding JSON: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid input data",
+			"details": err.Error(),
+		})
 		return
 	}
 
