@@ -65,6 +65,8 @@ func main() {
 	router.POST("/admin/waiter/create", handlers.CreateWaiterHandler)
 	// Adding shift
 	router.POST("/admin/shift/create", handlers.CreateShiftHandler)
+	// Adding served table
+	router.PATCH("/admin/shift/add_served_table/:shift_id", handlers.AddServedTableHandler)
 
 	router.Run(":8080")	
 }

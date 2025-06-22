@@ -22,3 +22,18 @@ func CreateShift(shift *models.Shift) error {
 	}
 	return nil
 }
+
+func AddServedTable(shiftID int) error {
+	if db.DB == nil {
+		log.Println("Database connection is not initialized")
+		return sql.ErrConnDone
+	}
+
+	query := "UPDATE shifts SET tables_served = tables_served + 1 WHERE id = $1"
+	_, err := db.DB.Exec(query, shiftID)
+	if err != nil {
+		log.Printf("Error adding served table: %v", err)
+		return err
+	}
+	return nil
+}
