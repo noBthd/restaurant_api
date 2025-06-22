@@ -100,6 +100,6 @@ func CancelReservation(reservationID int) error {
 		log.Printf("Failed to cancel reservation: %v", err)
 		return err
 	}
-
+	
 	return nil
 }

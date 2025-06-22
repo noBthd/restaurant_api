@@ -58,5 +58,12 @@ func main() {
 	//==========================================
 	// UTIlITIES ROUTES
 
+	//===========================================
+	// ADMIN ROUTES
+
+	// Adding waiter
+	router.POST("/admin/waiter/add", handlers.CreateWaiterHandler)
+	
+
 	router.Run(":8080")	
 }
