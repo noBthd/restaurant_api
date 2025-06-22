@@ -35,5 +35,9 @@ func main() {
 	// Cancel a reservation
 	router.PATCH("/reservations/cancel/:id", handlers.CancelReservationHandler)
 
+	//=========================================
+	// MENU ROUTES
+	router.GET("/menu", handlers.GetAllMenuItemsHandler)
+
 	router.Run(":8080")	
 }
