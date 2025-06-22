@@ -33,7 +33,7 @@ func main() {
 	// Create a reservation
 	router.POST("/reservations/create", handlers.CreateReservationHandler)
 	// Cancel a reservation
-	router.DELETE("/reservations/cancel/:id", handlers.CancelReservationHandler)	
+	router.PATCH("/reservations/cancel/:id", handlers.CancelReservationHandler)
 
 	router.Run(":8080")	
 }

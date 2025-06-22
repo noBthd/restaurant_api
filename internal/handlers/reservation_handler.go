@@ -71,7 +71,7 @@ func CancelReservationHandler(c *gin.Context) {
 		log.Printf("Error canceling reservation: %v", err)
 		c.JSON(http.StatusInternalServerError, 
 			gin.H{
-				"error": "Failed to cancel 1reservation",
+				"error": "Failed to cancel reservation",
 				"details": err.Error(),
 			})
 		return

@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/noBthd/restaurant_api.git/internal/db"
@@ -69,8 +70,33 @@ func CancelReservation(reservationID int) error {
 		return sql.ErrConnDone
 	}
 
-	query := "UPDATE reservations SET is_active = false WHERE id = $1"
-	_, err := db.DB.Exec(query, reservationID)
+	query := "SELECT is_active FROM reservations WHERE id = $1"
+	row := db.DB.QueryRow(query, reservationID)
+	if row.Err() != nil {
+		log.Printf("Failed to find reservation with ID %d: %v", reservationID, row.Err())
+		return row.Err()
+	}
+
+	var isActive bool
+	err := row.Scan(&isActive)
+	// Handle the case where the reservation does not exist
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No reservation found with ID %d", reservationID)
+			return fmt.Errorf("no reservation found with ID %d", reservationID)
+		}
+		log.Printf("Failed to scan reservation: %v", err)
+		return err
+	}
+	
+	// Check if the reservation is already inactive
+	if !isActive {
+		log.Printf("Reservation with ID %d is already inactive", reservationID)
+		return fmt.Errorf("reservation with ID %d is already inactive", reservationID)
+	}
+
+	query = "UPDATE reservations SET is_active = false WHERE id = $1"
+	_, err = db.DB.Exec(query, reservationID)
 	if err != nil {
 		log.Printf("Failed to cancel reservation: %v", err)
 		return err
