@@ -39,5 +39,15 @@ func main() {
 	// MENU ROUTES
 	router.GET("/menu", handlers.GetAllMenuItemsHandler)
 
+	//=========================================
+	// BILL ROUTES
+
+	//==========================================
+	// ORDER ROUTES
+
+
+	//==========================================
+	// UTIlITIES ROUTES
+
 	router.Run(":8080")	
 }
