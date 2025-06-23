@@ -56,7 +56,7 @@ func main() {
 	router.POST("/orders/create", handlers.CreateMenuOrderHandler)
 
 	//==========================================
-	// UTIlITIES ROUTES
+	// UTILITIES ROUTES
 
 	//===========================================
 	// ADMIN ROUTES

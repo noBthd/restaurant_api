@@ -54,10 +54,35 @@ func CreateReservation(reservation models.Reservation) error {
 		return sql.ErrConnDone
 	}
 
-	query := "INSERT INTO reservations (table_id, user_id, start_time, end_time) VALUES ($1, $2, $3, $4)"
-	_, err := db.DB.Exec(query, reservation.TableID, reservation.UserID, reservation.StartTime, reservation.EndTime)
+	// Check for overlapping active reservations with a 30-minute break
+	query := `
+		SELECT COUNT(1)
+		FROM reservations
+		WHERE table_id = $1
+			AND is_active = true
+			AND (
+				($2 < end_time + INTERVAL '30 minutes') AND
+				($3 > start_time - INTERVAL '30 minutes')
+			)
+	`
+	var count int
+	err := db.DB.QueryRow(query, reservation.TableID, reservation.StartTime, reservation.EndTime).Scan(&count)
 	if err != nil {
-		log.Printf("Failed to create user: %v", err)
+		log.Printf("Failed to check for overlapping reservations: %v", err)
+		return err
+	}
+	if count > 0 {
+		return fmt.Errorf("table %d is already reserved in the selected time range or within 30 minutes before/after", reservation.TableID)
+	}
+
+	// Insert the reservation
+	insertQuery := `
+		INSERT INTO reservations (table_id, user_id, start_time, end_time, is_active)
+		VALUES ($1, $2, $3, $4, true)
+	`
+	_, err = db.DB.Exec(insertQuery, reservation.TableID, reservation.UserID, reservation.StartTime, reservation.EndTime)
+	if err != nil {
+		log.Printf("Failed to create reservation: %v", err)
 		return err
 	}
 
