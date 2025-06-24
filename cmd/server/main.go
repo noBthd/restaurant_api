@@ -30,6 +30,8 @@ func main() {
 	//=========================================
 	// RESERVATION ROUTES
 	router.GET("/reservations", handlers.GetAllReservationsHandler)
+	// Get reservation by user ID
+	router.GET("/reservations/user/:user_id", handlers.GetReservedTableByUserIDHandler)
 	// Create a reservation
 	router.POST("/reservations/create", handlers.CreateReservationHandler)
 	// Cancel a reservation
@@ -71,6 +73,8 @@ func main() {
 	router.DELETE("/admin/user/remove/:id", handlers.RemoveUserHandler)
 	// Make user admin
 	router.PATCH("/admin/user/make_admin/:id", handlers.MakeUserAdminHandler)
+	// Get all orders by reservationID
+	router.GET("/admin/menu_orders/reservation/:id", handlers.GetAllMenuOrdersByReservationIDHandler)
 
 	router.Run(":8080")	
 }

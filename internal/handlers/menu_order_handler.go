@@ -81,3 +81,29 @@ func CreateMenuOrderHandler(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Menu order created successfully", "order_id": menuOrder.OrderID})
 }
+
+func GetAllMenuOrdersByReservationIDHandler(c *gin.Context) {
+	reservationID, err := strconv.Atoi(c.Param("id"))
+	if err != nil || reservationID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid reservation ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	menuOrders, err := services.GetAllMenuOrdersByReservationID(reservationID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch menu orders for reservation",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if len(menuOrders) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No menu orders found for this reservation"})
+		return
+	}
+	c.JSON(http.StatusOK, menuOrders)
+}

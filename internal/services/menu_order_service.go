@@ -113,3 +113,41 @@ func CreateMenuOrder(MenuOrder *models.MenuOrder, reservationID int) error {
 
 	return nil
 }
+
+func GetAllMenuOrdersByReservationID(reservationID int) ([]models.MenuOrder, error) {
+	if db.DB == nil {
+		log.Println("Database connection is nil")
+		return nil, sql.ErrConnDone
+	}
+
+	query := `SELECT mo.*
+		FROM menu_orders mo
+		JOIN orders o ON mo.order_id = o.id
+		JOIN bill b ON o.bill_id = b.id
+		JOIN reservations r ON b.reservation_id = r.id
+		WHERE r.id = $1;`
+
+	rows, err := db.DB.Query(query, reservationID)
+	if err != nil {
+		log.Printf("Error querying menu orders by reservation ID %d: %v\n", reservationID, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var menuOrders []models.MenuOrder
+	for rows.Next() {
+		var menuOrder models.MenuOrder
+		if err := rows.Scan(&menuOrder.ID, &menuOrder.OrderID, &menuOrder.MenuItemID, &menuOrder.Quantity, &menuOrder.Price); err != nil {
+			log.Printf("Error scanning menu order: %v\n", err)
+			return nil, err
+		}
+
+		menuOrders = append(menuOrders, menuOrder)
+	}
+	if err := rows.Err(); err != nil {
+		log.Printf("Error iterating over menu orders: %v\n", err)
+		return nil, err
+	}
+
+	return menuOrders, nil
+}

@@ -79,3 +79,36 @@ func CancelReservationHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Reservation canceled successfully"})
 }
+
+func GetReservedTableByUserIDHandler(c *gin.Context) {
+	userIDStr := c.Param("user_id")
+	if userIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		log.Printf("Error converting user ID to integer: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	reservations, err := services.GetReservedTableByUserID(userID)
+	if err != nil {
+		log.Printf("Error fetching reservations for user ID %d: %v", userID, err)
+		c.JSON(http.StatusInternalServerError, 
+			gin.H{
+				"error": "Failed to fetch reservations for user",
+				"details": err.Error(),
+			})
+		return
+	}
+
+	if len(reservations) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No reservations found for this user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, reservations)
+}

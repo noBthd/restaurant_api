@@ -62,7 +62,9 @@ func CreateReservation(reservation models.Reservation) error {
 			AND is_active = true
 			AND (
 				($2 < end_time + INTERVAL '30 minutes') AND
-				($3 > start_time - INTERVAL '30 minutes')
+				($3 > start_time - INTERVAL '30 minutes') AND
+				($2 < end_time AND $3 > start_time) AND
+				($2 > 10:00:00 AND $3 < 22:00:00) -- Assuming restaurant hours are from 10 AM to 10 PM				
 			)
 	`
 	var count int
@@ -127,4 +129,50 @@ func CancelReservation(reservationID int) error {
 	}
 	
 	return nil
+}
+
+func GetReservedTableByUserID(userID int) ([]models.Reservation, error) {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return nil, sql.ErrConnDone
+	}
+
+	query := "SELECT * FROM reservations WHERE user_id = $1"
+	rows, err := db.DB.Query(query, userID)
+	if err != nil {
+		log.Printf("Failed to get reservations for user ID %d: %v", userID, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var reservations []models.Reservation
+
+	for rows.Next() {
+		var reservation models.Reservation
+		err := rows.Scan(
+			&reservation.ID, 
+			&reservation.TableID, 
+			&reservation.UserID, 
+			&reservation.StartTime, 
+			&reservation.EndTime, 
+			&reservation.Is_active,
+		)
+		if err != nil {
+			log.Printf("Failed to scan reservation: %v", err)
+			return nil, err
+		}
+		// Check if reservation is active
+		if !reservation.Is_active {
+			log.Printf("Reservation with ID %d is not active", reservation.ID)
+			continue
+		}
+		reservations = append(reservations, reservation)
+	}
+
+	if len(reservations) == 0 {
+		log.Printf("No active reservations found for user ID %d", userID)
+		return nil, fmt.Errorf("no active reservations found for user ID %d", userID)
+	}
+
+	return reservations, nil
 }
