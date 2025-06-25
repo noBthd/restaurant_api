@@ -36,6 +36,8 @@ func main() {
 	router.POST("/reservations/create", handlers.CreateReservationHandler)
 	// Cancel a reservation
 	router.PATCH("/reservations/cancel/:id", handlers.CancelReservationHandler)
+	// Get reservation by date
+	router.GET("/reservations/date/:date", handlers.GetReservationByDateHandler)
 
 	//=========================================
 	// MENU ROUTES

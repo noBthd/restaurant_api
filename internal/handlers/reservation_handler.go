@@ -132,3 +132,29 @@ func GetAllTodayReservationsHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, reservations)
 }
+
+func GetReservationByDateHandler(c *gin.Context) {
+	date := c.Param("date")
+	if date == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date is required"})
+		return
+	}
+
+	reservations, err := services.GetReservationByDate(date)
+	if err != nil {
+		log.Printf("Error fetching reservations for date %s: %v", date, err)
+		c.JSON(http.StatusInternalServerError, 
+			gin.H{
+				"error": "Failed to fetch reservations for the specified date",
+				"details": err.Error(),
+			})
+		return
+	}
+
+	if len(reservations) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No reservations found for the specified date"})
+		return
+	}
+
+	c.JSON(http.StatusOK, reservations)
+}

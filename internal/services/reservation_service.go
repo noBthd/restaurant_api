@@ -74,7 +74,7 @@ func CreateReservation(reservation models.Reservation) error {
 		log.Printf("Reservation duration must be at least 30 minutes")
 		return fmt.Errorf("reservation duration must be at least 30 minutes")
 	}
-	
+
 	now := time.Now().In(loc)
 	log.Printf("DEBUG: now=%v, startTime=%v, endTime=%v", now, startTime, endTime)
 	if !startTime.After(now) || !endTime.After(now) {
@@ -241,6 +241,48 @@ func GetAllTodayReservations() ([]models.Reservation, error) {
 	if len(reservations) == 0 {
 		log.Println("No active reservations found for today")
 		return nil, fmt.Errorf("no active reservations found for today")
+	}
+
+	return reservations, nil
+}
+
+func GetReservationByDate(dateStr string) ([]models.Reservation, error) {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return nil, sql.ErrConnDone
+	}
+
+	parsedDate, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		log.Printf("Invalid date format: %v", err)
+		return nil, fmt.Errorf("invalid date format, expected YYYY-MM-DD")
+	}
+	formattedDate := parsedDate.Format("2006-01-02")
+
+	query := "SELECT * FROM reservations WHERE DATE(start_time) = $1 AND is_active = true"
+	rows, err := db.DB.Query(query, formattedDate)
+	if err != nil {
+		log.Printf("Failed to get reservations by date %s: %v", formattedDate, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var reservations []models.Reservation
+	for rows.Next() {
+		var reservation models.Reservation
+		err := rows.Scan(
+			&reservation.ID,
+			&reservation.TableID,
+			&reservation.UserID,
+			&reservation.StartTime,
+			&reservation.EndTime,
+			&reservation.Is_active,
+		)
+		if err != nil {
+			log.Printf("Failed to scan reservation: %v", err)
+			return nil, err
+		}
+		reservations = append(reservations, reservation)
 	}
 
 	return reservations, nil
