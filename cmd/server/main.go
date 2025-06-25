@@ -62,7 +62,8 @@ func main() {
 
 	//==========================================
 	// UTILITIES ROUTES
-	// Adding served table
+	// Get all free tables
+	router.GET("/utilities/free_tables/:date", handlers.GetAllFreeSlotToReserveHandler)
 
 	//===========================================
 	// ADMIN ROUTES
