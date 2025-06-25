@@ -19,7 +19,16 @@ func CreateShiftHandler(c *gin.Context) {
 		return
 	}
 
-	if err := services.CreateShift(&shift); err != nil {
+	tableID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to create shift",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if err := services.CreateShift(&shift, tableID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to create shift",
 			"details": err.Error(),
@@ -49,4 +58,25 @@ func AddServedTableHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Served table added successfully"})
+}
+
+func AddServedTableByReservationHandler(c *gin.Context) {
+	reservationID, err := strconv.Atoi(c.Param("reservation_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid reservation ID",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if err := services.AddServedTableByReservation(reservationID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to add served table by reservation",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Served table added successfully by reservation"})
 }

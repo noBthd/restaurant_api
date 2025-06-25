@@ -48,6 +48,7 @@ func main() {
 	router.GET("/bills/:reservation_id", handlers.GetBillByReservationIDHandler)
 	// Pay a bill
 	router.PATCH("/bills/pay/:reservation_id", handlers.PayBillHandler)
+	//
 
 	//==========================================
 	// ORDER ROUTES
@@ -59,6 +60,7 @@ func main() {
 
 	//==========================================
 	// UTILITIES ROUTES
+	// Adding served table
 
 	//===========================================
 	// ADMIN ROUTES
@@ -66,7 +68,7 @@ func main() {
 	// Adding waiter
 	router.POST("/admin/waiter/create", handlers.CreateWaiterHandler)
 	// Adding shift
-	router.POST("/admin/shift/create", handlers.CreateShiftHandler)
+	router.POST("/admin/shift/create/table/:id", handlers.CreateShiftHandler)
 	// Adding served table
 	router.PATCH("/admin/shift/add_served_table/:shift_id", handlers.AddServedTableHandler)
 	// Remove user
@@ -75,6 +77,9 @@ func main() {
 	router.PATCH("/admin/user/make_admin/:id", handlers.MakeUserAdminHandler)
 	// Get all orders by reservationID
 	router.GET("/admin/menu_orders/reservation/:id", handlers.GetAllMenuOrdersByReservationIDHandler)
+	// Adding served table by reservation ID
+	router.PATCH("/admin/shift/add_served_table_by_reservation/:reservation_id", handlers.AddServedTableByReservationHandler)
+
 
 	router.Run(":8080")	
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/noBthd/restaurant_api.git/internal/db"
 	"github.com/noBthd/restaurant_api.git/internal/models"
@@ -53,8 +54,32 @@ func CreateReservation(reservation models.Reservation) error {
 		log.Print("Database connection is not initialized")
 		return sql.ErrConnDone
 	}
+	
+	startTime, err := time.Parse("2006-01-02 15:04:05", reservation.StartTime)
+	if err != nil {
+		log.Printf("Invalid start time format: %v", err)
+		return fmt.Errorf("invalid start time format")
+	}
+	endTime, err := time.Parse("2006-01-02 15:04:05", reservation.EndTime)
+	if err != nil {
+		log.Printf("Invalid end time format: %v", err)
+		return fmt.Errorf("invalid end time format")
+	}
+	if startTime.Hour() < 10 || endTime.Hour() > 22 || (endTime.Hour() == 22 && endTime.Minute() > 0) {
+		log.Printf("Reservation time is outside of allowed hours (10:00 - 22:00)")
+		return fmt.Errorf("reservations are only allowed between 10:00 and 22:00")
+	}
+	if startTime.Add(30 * time.Minute).After(endTime) {
+		log.Printf("Reservation duration must be at least 30 minutes")
+		return fmt.Errorf("reservation duration must be at least 30 minutes")
+	}
+	now := time.Now()
+	if !startTime.After(now) || !endTime.After(now) {
+		log.Printf("Reservation times must be in the future")
+		return fmt.Errorf("reservation times must be in the future")
+	}
+	
 
-	// Check for overlapping active reservations with a 30-minute break
 	query := `
 		SELECT COUNT(1)
 		FROM reservations
@@ -63,12 +88,11 @@ func CreateReservation(reservation models.Reservation) error {
 			AND (
 				($2 < end_time + INTERVAL '30 minutes') AND
 				($3 > start_time - INTERVAL '30 minutes') AND
-				($2 < end_time AND $3 > start_time) AND
-				($2 > 10:00:00 AND $3 < 22:00:00) -- Assuming restaurant hours are from 10 AM to 10 PM				
+				($2 < end_time AND $3 > start_time)
 			)
 	`
 	var count int
-	err := db.DB.QueryRow(query, reservation.TableID, reservation.StartTime, reservation.EndTime).Scan(&count)
+	err = db.DB.QueryRow(query, reservation.TableID, reservation.StartTime, reservation.EndTime).Scan(&count)
 	if err != nil {
 		log.Printf("Failed to check for overlapping reservations: %v", err)
 		return err
