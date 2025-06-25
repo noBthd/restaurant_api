@@ -79,6 +79,8 @@ func main() {
 	router.GET("/admin/menu_orders/reservation/:id", handlers.GetAllMenuOrdersByReservationIDHandler)
 	// Adding served table by reservation ID
 	router.PATCH("/admin/shift/add_served_table_by_reservation/:reservation_id", handlers.AddServedTableByReservationHandler)
+	// Getting all today reservations
+	router.GET("/admin/reservations/today", handlers.GetAllTodayReservationsHandler)
 
 
 	router.Run(":8080")	

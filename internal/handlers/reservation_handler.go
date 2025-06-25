@@ -112,3 +112,23 @@ func GetReservedTableByUserIDHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, reservations)
 }
+
+func GetAllTodayReservationsHandler(c *gin.Context) {
+	reservations, err := services.GetAllTodayReservations()
+	if err != nil {
+		log.Printf("Error fetching today's reservations: %v", err)
+		c.JSON(http.StatusInternalServerError, 
+			gin.H{
+				"error": "Failed to fetch today's reservations",
+				"details": err.Error(),
+			})
+		return
+	}
+
+	if len(reservations) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No reservations found for today"})
+		return
+	}
+
+	c.JSON(http.StatusOK, reservations)
+}

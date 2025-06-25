@@ -55,15 +55,16 @@ func CreateReservation(reservation models.Reservation) error {
 		return sql.ErrConnDone
 	}
 	
-	startTime, err := time.Parse("2006-01-02 15:04:05", reservation.StartTime)
+	loc, _ := time.LoadLocation("Europe/Moscow")
+	startTime, err := time.ParseInLocation("2006-01-02 15:04:05", reservation.StartTime, loc)
 	if err != nil {
-		log.Printf("Invalid start time format: %v", err)
-		return fmt.Errorf("invalid start time format")
+		log.Printf("Invalid time format: %v", err)
+		return fmt.Errorf("invalid time format")
 	}
-	endTime, err := time.Parse("2006-01-02 15:04:05", reservation.EndTime)
+	endTime, err := time.ParseInLocation("2006-01-02 15:04:05", reservation.EndTime, loc)
 	if err != nil {
-		log.Printf("Invalid end time format: %v", err)
-		return fmt.Errorf("invalid end time format")
+		log.Printf("Invalid time format: %v", err)
+		return fmt.Errorf("invalid time format")
 	}
 	if startTime.Hour() < 10 || endTime.Hour() > 22 || (endTime.Hour() == 22 && endTime.Minute() > 0) {
 		log.Printf("Reservation time is outside of allowed hours (10:00 - 22:00)")
@@ -73,7 +74,9 @@ func CreateReservation(reservation models.Reservation) error {
 		log.Printf("Reservation duration must be at least 30 minutes")
 		return fmt.Errorf("reservation duration must be at least 30 minutes")
 	}
-	now := time.Now()
+	
+	now := time.Now().In(loc)
+	log.Printf("DEBUG: now=%v, startTime=%v, endTime=%v", now, startTime, endTime)
 	if !startTime.After(now) || !endTime.After(now) {
 		log.Printf("Reservation times must be in the future")
 		return fmt.Errorf("reservation times must be in the future")
@@ -196,6 +199,48 @@ func GetReservedTableByUserID(userID int) ([]models.Reservation, error) {
 	if len(reservations) == 0 {
 		log.Printf("No active reservations found for user ID %d", userID)
 		return nil, fmt.Errorf("no active reservations found for user ID %d", userID)
+	}
+
+	return reservations, nil
+}
+
+func GetAllTodayReservations() ([]models.Reservation, error) {
+	if db.DB == nil {
+		log.Print("Database connection is not initialized")
+		return nil, sql.ErrConnDone
+	}
+
+	today := time.Now().Format("2006-01-02")
+	query := "SELECT * FROM reservations WHERE DATE(start_time) = $1 AND is_active = true"
+	rows, err := db.DB.Query(query, today)
+	if err != nil {
+		log.Printf("Failed to get today's reservations: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var reservations []models.Reservation
+
+	for rows.Next() {
+		var reservation models.Reservation
+		err := rows.Scan(
+			&reservation.ID, 
+			&reservation.TableID, 
+			&reservation.UserID, 
+			&reservation.StartTime, 
+			&reservation.EndTime, 
+			&reservation.Is_active,
+		)
+		if err != nil {
+			log.Printf("Failed to scan reservation: %v", err)
+			return nil, err
+		}
+		reservations = append(reservations, reservation)
+	}
+
+	if len(reservations) == 0 {
+		log.Println("No active reservations found for today")
+		return nil, fmt.Errorf("no active reservations found for today")
 	}
 
 	return reservations, nil
