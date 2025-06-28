@@ -287,3 +287,4 @@ func GetReservationByDate(dateStr string) ([]models.Reservation, error) {
 
 	return reservations, nil
 }
+
